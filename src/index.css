@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  --color-marigold: #ff9933;
+  --color-maroon: #7b1e26;
+  --color-maroon-deep: #5c141b;
+  --color-gold: #d4a017;
+  --color-rose: #f6d7ce;
+  --color-cream: #fff7ec;
+  --color-mehndi: #4e6b2f;
+  --color-ink: #3a2620;
+  --color-sand: #8a7360;
+
+  --font-display: "Yatra One", cursive;
+  --font-serif: "Fraunces", serif;
+  --font-sans: "Karla", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* gold shimmer sweep for the hero title */
+.shimmer-text {
+  background: linear-gradient(90deg, #7b1e26, #ff9933, #d4a017, #7b1e26);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+@keyframes floaty {
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+.floaty {
+  animation: floaty 4.5s ease-in-out infinite;
+}
+
+@keyframes dangle {
+  50% {
+    transform: rotate(8deg) translateY(3px);
+  }
+}
+.dangle {
+  animation: dangle 3.6s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 14px rgba(255, 170, 60, 0.75));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 200, 100, 0.95));
+    transform: scale(1.05) rotate(-1deg);
+  }
+}
+.flicker {
+  animation: flicker 1.7s ease-in-out infinite;
+}
+
+/* shimmer sweep for primary CTAs — magicui shimmer-button pattern, CSS only */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 220, 150, 0.45) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: btn-sweep 3.2s ease-in-out infinite;
+}
+@keyframes btn-sweep {
+  55%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-text,
+  .floaty,
+  .dangle,
+  .flicker,
+  .btn-shimmer::after {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
