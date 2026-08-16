@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-// Rising warm embers for the diya section — visual borrowed from the
-// 21st.dev @lepikhinb Sparkles demo (particles over a glowing horizon),
-// hand-rolled on canvas to skip the ~80KB tsparticles dependency.
+// Rising embers for the diya section — 2D canvas, deliberately not WebGL, so
+// it can run alongside the galaxy without competing for a second GL context.
 export default function Embers({ intensity = 1 }) {
   const ref = useRef(null)
   const intensityRef = useRef(intensity)
@@ -46,7 +45,7 @@ export default function Embers({ intensity = 1 }) {
         const y = e.y * H
         const twinkle = 0.35 + 0.65 * Math.abs(Math.sin(t / 700 + e.phase))
         ctx.beginPath()
-        ctx.fillStyle = e.warm > 0.5 ? '#ffb340' : '#ffd9a0'
+        ctx.fillStyle = e.warm > 0.5 ? '#DB3F3C' : '#FFC727'
         ctx.globalAlpha = twinkle * (0.25 + 0.5 * boost)
         ctx.arc(x, y, e.r, 0, Math.PI * 2)
         ctx.fill()

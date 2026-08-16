@@ -1,46 +1,125 @@
 @import "tailwindcss";
 
-@theme {
-  --color-marigold: #ff9933;
-  --color-maroon: #7b1e26;
-  --color-maroon-deep: #5c141b;
-  --color-gold: #d4a017;
-  --color-rose: #f6d7ce;
-  --color-cream: #fff7ec;
-  --color-mehndi: #4e6b2f;
-  --color-ink: #3a2620;
-  --color-sand: #8a7360;
+/* ============================================================
+   PALETTE
+   Flat light system on the client's exact tokens. Token NAMES are
+   kept from the old night theme (moon/night/kumkum/brass) so every
+   existing text-moon / bg-night-2 / border-kumkum class across the
+   components keeps working — only the values underneath changed.
 
-  --font-display: "Yatra One", cursive;
-  --font-serif: "Fraunces", serif;
-  --font-sans: "Karla", sans-serif;
+   Role assignment (brass and mehndi both needed a home; the client
+   only specified 3 accents):
+     kumkum → red    #DB3F3C  primary accent: CTAs, links, emphasis
+     brass  → green  #467E13  secondary accent: hairlines + small
+                               text (eyebrows, signatures) — yellow
+                               fails contrast at that weight/size on
+                               #F5F5F5, green passes
+     mehndi → green  (unused token, kept consistent, renders nowhere)
+   Yellow (#FFC727) is used directly, not through a token — it only
+   ever fills decorative shapes (rakhi beads, confetti, 3D sparkles)
+   where text-contrast rules don't apply.
+   ============================================================ */
+@theme {
+  --color-night: #f5f5f5;
+  --color-night-2: #ebebeb;
+  --color-night-3: #ffffff;
+  --color-moon: #1e1e1e;
+  --color-moon-dim: #666666;
+  --color-kumkum: #db3f3c;
+  --color-kumkum-deep: #b93a37;
+  --color-brass: #467e13;
+  --color-mehndi: #467e13;
+
+  --font-indic: "Anek Gujarati", system-ui, sans-serif;
+  --font-display: "Bodoni Moda", Georgia, serif;
+  --font-sans: "Karla", system-ui, -apple-system, sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--color-cream);
-  color: var(--color-ink);
+  background: var(--color-night);
+  color: var(--color-moon);
   font-family: var(--font-sans);
+  line-height: 1.65;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* gold shimmer sweep for the hero title */
-.shimmer-text {
-  background: linear-gradient(90deg, #7b1e26, #ff9933, #d4a017, #7b1e26);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 7s linear infinite;
+/* faint warmth in the corners — barely-there on a flat light ground,
+   was a strong moon/kumkum glow when the page itself was dark */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(1100px 620px at 78% -12%, rgba(219, 63, 60, 0.05), transparent 62%),
+    radial-gradient(760px 520px at 12% 108%, rgba(70, 126, 19, 0.05), transparent 60%);
 }
-@keyframes shimmer {
-  to {
-    background-position: 300% 0;
-  }
+
+:focus-visible {
+  /* brass→green reads fine as a border but is too low-contrast for a focus
+     RING against #F5F5F5 at 2px — red is the one token that stays visible */
+  outline: 2px solid var(--color-kumkum);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+canvas {
+  display: block;
+}
+
+/* ---------- type primitives ---------- */
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+  font-weight: 600;
+}
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 1.2rem + 3.4vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+}
+.h2 em {
+  font-style: italic;
+  color: var(--color-kumkum);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  border: 1px solid var(--color-brass);
+  border-radius: 2px;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.btn:hover {
+  background: var(--color-brass);
+  /* was --color-night (dark, correct when night meant the page bg). Now
+     night IS the light bg, so the hover text needs --color-moon (ink)
+     instead, or it goes near-invisible on the green fill. */
+  color: var(--color-moon);
+}
+.btn-solid {
+  background: var(--color-kumkum);
+  border-color: var(--color-kumkum);
+  color: #fff;
+}
+.btn-solid:hover {
+  background: var(--color-kumkum-deep);
+  border-color: var(--color-kumkum-deep);
+  color: #fff;
 }
 
 @keyframes floaty {
@@ -65,11 +144,11 @@ body {
 @keyframes flicker {
   0%,
   100% {
-    filter: drop-shadow(0 0 14px rgba(255, 170, 60, 0.75));
+    filter: drop-shadow(0 0 14px rgba(219, 63, 60, 0.55));
     transform: scale(1);
   }
   50% {
-    filter: drop-shadow(0 0 30px rgba(255, 200, 100, 0.95));
+    filter: drop-shadow(0 0 30px rgba(255, 199, 39, 0.85));
     transform: scale(1.05) rotate(-1deg);
   }
 }
@@ -77,7 +156,8 @@ body {
   animation: flicker 1.7s ease-in-out infinite;
 }
 
-/* shimmer sweep for primary CTAs — magicui shimmer-button pattern, CSS only */
+/* white sweep on primary CTAs — sits on the red fill, not on the page, so it
+   doesn't need to track the ink/moon token */
 .btn-shimmer {
   position: relative;
   overflow: hidden;
@@ -89,7 +169,7 @@ body {
   background: linear-gradient(
     115deg,
     transparent 30%,
-    rgba(255, 220, 150, 0.45) 50%,
+    rgba(255, 255, 255, 0.35) 50%,
     transparent 70%
   );
   transform: translateX(-100%);
@@ -103,7 +183,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shimmer-text,
   .floaty,
   .dangle,
   .flicker,

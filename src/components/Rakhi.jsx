@@ -1,60 +1,98 @@
-// Hand-drawn SVG rakhi — mandala medallion with trailing threads.
-// Three variants so sisters can pick "their" rakhi in the tie ceremony.
-const VARIANTS = {
-  surya: { outer: '#7b1e26', mid: '#ff9933', inner: '#d4a017', bead: '#fff3df' },
-  kamal: { outer: '#a03a63', mid: '#f6a5c0', inner: '#7b1e26', bead: '#ffe9f1' },
-  mor: { outer: '#1f5f5b', mid: '#3aa17e', inner: '#d4a017', bead: '#eafff5' },
-}
+import { useMemo } from 'react'
+import { rakhiSpec } from '../lib/seed'
 
-export default function Rakhi({ variant = 'surya', size = 150, threads = true, className = '' }) {
-  const c = VARIANTS[variant] || VARIANTS.surya
-  const petals = Array.from({ length: 12 }, (_, i) => i * 30)
+// Procedural SVG rakhi. `seed` is any string — a wish's name+title, a variant
+// name, anything. Same string always draws the same rakhi; different strings
+// never draw the same one.
+//
+// The SVG matches the 3D Medallion in Rakhi3D so the thali preview and the
+// tie-ceremony model look like the same object:
+//   · ring at r=21 from centre (maps to 1.05 in 3D, ×20)
+//   · petals centred at r=30 (maps to 1.5 in 3D, ×20)
+//   · beads sit ON the ring at r=21
+//   · core disc + kumkum dot at centre
+
+export default function Rakhi({ seed = 'rakhi', size = 150, threads = true, className = '' }) {
+  const s = useMemo(() => rakhiSpec(seed), [seed])
+
+  const CX = 50
+  const CY = 50
+  const RING_R = 21 // matches 1.05 in 3D
+  const PETAL_R = 30 // matches 1.5 in 3D
+
+  const petals = Array.from({ length: s.petals }, (_, i) => (i / s.petals) * Math.PI * 2)
+  const beads = Array.from({ length: s.beads }, (_, i) => (i / s.beads) * Math.PI * 2)
 
   return (
     <svg
       width={size}
       height={size}
-      viewBox="-60 -60 120 120"
+      viewBox="0 0 100 100"
       className={className}
       aria-hidden="true"
     >
       {threads && (
-        <g stroke={c.outer} strokeWidth="2.6" strokeLinecap="round" fill="none">
-          <path d="M -18 6 C -46 14, -52 26, -57 42" opacity="0.9" />
-          <path d="M 18 6 C 46 14, 52 26, 57 42" opacity="0.9" />
-          <circle cx="-57" cy="45" r="3" fill={c.mid} stroke="none" />
-          <circle cx="57" cy="45" r="3" fill={c.mid} stroke="none" />
+        <g stroke={s.ring} strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.9">
+          <path d="M 36 62 C 18 74, 14 84, 10 98" />
+          <path d="M 64 62 C 82 74, 86 84, 90 98" />
+          <circle cx="10" cy="98" r="2.6" fill="#FFC727" stroke="none" />
+          <circle cx="90" cy="98" r="2.6" fill="#FFC727" stroke="none" />
         </g>
       )}
-      {petals.map((deg) => (
-        <ellipse
-          key={deg}
-          cx="0"
-          cy="-24"
-          rx="7.5"
-          ry="14"
-          fill={c.mid}
-          stroke={c.outer}
-          strokeWidth="1.4"
-          transform={`rotate(${deg})`}
-          opacity="0.95"
-        />
-      ))}
-      {petals.map((deg) => (
+
+      <g transform={`rotate(${s.rot.toFixed(1)} ${CX} ${CY})`}>
+        {/* petals — elongated teardrops radiating outward, matching the 3D
+            spheres that are scaled [0.55, 0.15, 0.05]. rx is the long axis
+            (along the radius) and ry is the narrow cross-section. */}
+        {petals.map((a, i) => {
+          const x = CX + Math.cos(a) * PETAL_R
+          const y = CY + Math.sin(a) * PETAL_R
+          return (
+            <ellipse
+              key={i}
+              cx={x.toFixed(1)}
+              cy={y.toFixed(1)}
+              rx="11"
+              ry="3"
+              transform={`rotate(${((a * 180) / Math.PI).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`}
+              fill={s.ring}
+              opacity="0.7"
+            />
+          )
+        })}
+
+        {/* kumkum ring — the torus in 3D */}
         <circle
-          key={deg}
-          cx="0"
-          cy="-33"
-          r="2.2"
-          fill={c.bead}
-          transform={`rotate(${deg + 15})`}
+          cx={CX}
+          cy={CY}
+          r={RING_R}
+          fill="none"
+          stroke={s.ring}
+          strokeWidth="3.6"
+          opacity="0.85"
         />
-      ))}
-      <circle r="17" fill={c.inner} stroke={c.outer} strokeWidth="2" />
-      <circle r="9" fill={c.outer} />
-      <circle r="3.4" fill={c.bead} />
+
+        {/* brass beads ON the ring — instanced spheres in 3D */}
+        {beads.map((a, i) => (
+          <circle
+            key={i}
+            cx={(CX + Math.cos(a) * RING_R).toFixed(1)}
+            cy={(CY + Math.sin(a) * RING_R).toFixed(1)}
+            r="2.2"
+            fill="#FFC727"
+          />
+        ))}
+
+        {/* core disc — the flat sphere in 3D (scale [1,1,0.34]) */}
+        <circle cx={CX} cy={CY} r="7.2" fill={s.core} />
+
+        {/* kumkum dot at centre — the tiny emissive sphere */}
+        <circle cx={CX} cy={CY} r="2.4" fill={s.ring} />
+      </g>
     </svg>
   )
 }
 
-export const RAKHI_VARIANTS = Object.keys(VARIANTS)
+// The three rakhis offered in the tie ceremony — named after what they evoke,
+// each still generated from its own seed.
+export const RAKHI_VARIANTS = ['mogra', 'kesari', 'bandhani']
